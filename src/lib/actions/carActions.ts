@@ -1,4 +1,13 @@
-"use server" 
+"use server"
+import { auth } from "@/auth";
+import { AddCarSchema } from "../zod";
+import { prisma } from "../prisma";
+import { revalidatePath } from "next/cache";
+import { unstable_cache as cache } from "next/cache";
+import { CarType } from "@prisma/client";
+import { carTypes } from "@/constants/car";
+
+ 
 
 export const generateImage = async (text: string, name: string) => {
   
@@ -42,3 +51,207 @@ export const generateImage = async (text: string, name: string) => {
     throw new Error("Failed to generate image");
   }
 };
+
+
+export const addNewCar = async (carData : AddCarSchema) => {
+    const session  = await auth() ; 
+
+    const authUser = session?.user;
+    if(!authUser) {
+      throw new Error("User not authenticated");
+    }
+    const user = await prisma.user.findUnique({
+      where : {
+        email : authUser.email as string
+      }
+    })
+
+    if (!user) throw new Error("User not found");
+
+  await prisma.$transaction(async (tx) => {
+    const {
+      name,
+      brand,
+      type,
+      year,
+      mileage,
+      colors,
+      price,
+      description,
+      images,
+      features,
+      location,
+      fuelType,
+    } = carData;
+
+    const car = await tx.car.create({
+      data: {
+        name,
+        brand,
+        type,
+        year,
+        mileage,
+        colors,
+        price,
+        description,
+        images,
+        features,
+        location,
+        fuelType,
+        userId: user.id,
+      },
+    });
+
+    const {
+      sellerAddress,
+      sellerCity,
+      sellerCountry,
+      sellerEmail,
+      sellerName,
+      sellerPhone,
+      sellerState,
+      sellerWebsite,
+      sellerZip,
+      sellerImage,
+    } = carData;
+
+    await tx.carSeller.create({
+      data: {
+        address: sellerAddress,
+        city: sellerCity,
+        country: sellerCountry,
+        email: sellerEmail,
+        name: sellerName,
+        phone: sellerPhone,
+        state: sellerState,
+        website: sellerWebsite,
+        postalCode: sellerZip,
+        image: sellerImage,
+        carId: car.id,
+      },
+    });
+
+    const {
+      engineCapacity,
+      doors,
+      seats,
+      topSpeed,
+      acceleration,
+      horsepower,
+      torque,
+      length,
+      width,
+      height,
+      weight,
+    } = carData;
+
+    await tx.carSpecification.create({
+      data: {
+        engineCapacity,
+        doors,
+        seats,
+        topSpeed,
+        acceleration,
+        horsepower,
+        torque,
+        length,
+        width,
+        height,
+        weight,
+        carId: car.id,
+      },
+    });
+
+    return car;
+  });
+
+  console.log("Car added successfully");
+  revalidatePath("/");
+};
+
+export const getAllCars = cache(
+  async () => {
+    const cars = await prisma.car.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return cars;
+  },
+  ["cars"],
+  { revalidate: 60 * 60 * 24 }
+);
+
+export const getCars = cache( 
+  async ({ page = 1, type = "all" }: { page?: number; type?: string }) => {
+
+    const limit = 8 ; 
+    const offset = (page - 1) * limit;
+
+    const allowedTypes = type.split(",").map((t) => t.toUpperCase()) as [];
+    console.log(
+      "Allowed types", allowedTypes);
+    const verifiedTypes = allowedTypes.some((t) => 
+      carTypes.includes(t as CarType) || t === "all"
+    );
+
+    const cars = await prisma.car.findMany({
+      skip: offset,
+      take: limit,
+      where: {
+        ...(type !== "all" &&
+          verifiedTypes && {
+            type: { in: allowedTypes },
+          }),
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    return cars;
+  }
+,   
+  ["cars"],
+  { revalidate: 60 * 60 * 24 }
+);
+export const getCarById = cache(
+  async (id: string) => {
+    const car = await prisma.car.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        specification: true,
+        savedBy: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!car) throw new Error("Car not found");
+
+    return car;
+  },
+  [],
+  {
+    revalidate: 60 * 60 * 24,
+  }
+);
+
+export const getSellerInfo = cache(
+  async (carId: string) => {
+    const seller = await prisma.carSeller.findUnique({
+      where: {
+        carId,
+      },
+    });
+
+    return seller;
+  },
+  [],
+  { revalidate: 60 * 60 * 24 }
+);

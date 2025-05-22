@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import { useState , useEffect} from "react";
 import {
@@ -10,11 +12,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Filter } from "lucide-react";
 import { carTypes } from '@/constants/car';
 import { useRouter } from "next/navigation";
+import { CheckedState } from '@radix-ui/react-checkbox';
 
 function FilterBar() {
   const router = useRouter();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const handleCheckChange = (type : string ,changed : boolean ) => {
+  const handleCheckChange = (type : string ,changed : CheckedState ) => {
     const newTypes = changed ? [...activeFilters,type] : activeFilters.filter((a) => a !==type); 
     setActiveFilters(newTypes);
   }

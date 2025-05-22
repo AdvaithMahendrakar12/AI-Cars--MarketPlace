@@ -11,13 +11,9 @@ export const carTypes = [
     "CROSSOVER",
     "SPORTS",
 ] as const;
-export const carFuelTypes = [
-    "PETROL",
-    "DIESEL",
-    "ELECTRIC",
-    "HYBRID",
-    "CNG",
-    "LPG",
-] as const;
+
+export const carFuelTypes = ["PETROL", "DIESEL", "ELECTRIC", "HYBRID"] as const;
+export type CarType = (typeof carTypes)[number];
+export type CarFuelType = (typeof carFuelTypes)[number];
 
  

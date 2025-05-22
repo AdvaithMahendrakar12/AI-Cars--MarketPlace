@@ -1,7 +1,7 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // import { AddCarForm, GenerateImage } from "./components";
-import { GenerateImage } from "./components";
+import { GenerateImage , AddCarForm } from "./components";
 
 const Page = () => {
   return (
@@ -14,7 +14,7 @@ const Page = () => {
           </TabsList>
 
           <TabsContent value="add-car" className="w-[50rem]">
-            {/* <AddCarForm /> */} Add Car Form
+            <AddCarForm /> 
           </TabsContent>
           <TabsContent value="generate-image" className="w-[50rem]">
             <GenerateImage/> 

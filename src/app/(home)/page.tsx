@@ -1,4 +1,4 @@
-"use client"
+
 import React from 'react'
 import {Image} from '@imagekit/next'
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Suspense } from "react";
+import { getCars } from '@/lib/actions/carActions';
 type Props = {
   searchParams: { type: string; page: string };
 };
 const Home = ({ searchParams }: Props) => {
+  
   return (
     <main>
       
@@ -116,10 +118,12 @@ const Home = ({ searchParams }: Props) => {
 }
 
 const FeaturedCars = async ({ searchParams }: Props) => {
+  "use server";
   const page = Number(searchParams.page) || 1;
   const type = searchParams.type || "all";
 
-  const cars = sampleCars; 
+  const cars = await getCars({ page, type });
+
 
   return cars.map((car) => (
     <Card key={car.id} className="overflow-hidden">
@@ -156,86 +160,7 @@ const FeaturedCars = async ({ searchParams }: Props) => {
   ));
 };
 
-const sampleCars = [
-  {
-    id: "car1",
-    name: "Model S",
-    brand: "Tesla",
-    type: "SEDAN",
-    year: 2022,
-    mileage: 12000,
-    colors: ["Red", "Black"],
-    price: 79999,
-    description: "A premium electric sedan with cutting-edge features.",
-    images: ["/images/tesla-model-s.jpg"],
-    userId: "user1",
-    isSold: false,
-    isFeatured: true,
-    isNew: true,
-    features: ["Autopilot", "Electric", "Sunroof"],
-    location: "San Francisco, CA",
-    fuelType: "ELECTRIC",
-    transmission: "AUTOMATIC",
-    savedBy: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    specification: null,
-    seller: null,
-    testDriveRequests: [],
-  },
-  {
-    id: "car2",
-    name: "Civic",
-    brand: "Honda",
-    type: "SEDAN",
-    year: 2019,
-    mileage: 45000,
-    colors: ["White", "Gray"],
-    price: 19999,
-    description: "A reliable and fuel-efficient car for everyday driving.",
-    images: ["/images/honda-civic.jpg"],
-    userId: "user2",
-    isSold: false,
-    isFeatured: true,
-    isNew: false,
-    features: ["Cruise Control", "Backup Camera"],
-    location: "Austin, TX",
-    fuelType: "PETROL",
-    transmission: "MANUAL",
-    savedBy: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    specification: null,
-    seller: null,
-    testDriveRequests: [],
-  },
-  {
-    id: "car3",
-    name: "F-150",
-    brand: "Ford",
-    type: "TRUCK",
-    year: 2021,
-    mileage: 25000,
-    colors: ["Blue", "Black"],
-    price: 35999,
-    description: "A tough and capable truck with impressive towing capacity.",
-    images: ["/images/ford-f150.jpg"],
-    userId: "user3",
-    isSold: false,
-    isFeatured: true,
-    isNew: false,
-    features: ["4WD", "Tow Package", "Bluetooth"],
-    location: "Denver, CO",
-    fuelType: "DIESEL",
-    transmission: "AUTOMATIC",
-    savedBy: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    specification: null,
-    seller: null,
-    testDriveRequests: [],
-  },
-];
+
 
 const features = [
   {
