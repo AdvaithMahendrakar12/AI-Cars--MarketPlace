@@ -30,11 +30,11 @@ export default function TestDriveForm({ carId }: TestDriveFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Set minimum date to tomorrow
+  
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
-  // Set maximum date to 30 days in the future
+  
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 30);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-// import { bookmarkCar } from "@/lib/actions/cars-action";
+import { bookmarkCar } from "@/lib/actions/carActions";
 import { HeartIcon, Share2Icon } from "lucide-react";
 import { useOptimistic } from "react";
 import { toast } from "sonner";
@@ -43,7 +43,7 @@ export const CoverButtons = ({ carId, savedBy, userId }: Props) => {
       <form
         action={async () => {
           startTransition(true);
-        //   await bookmarkCar(carId);
+          await bookmarkCar(carId);
         }}
       >
         <Button variant="outline" size="icon">

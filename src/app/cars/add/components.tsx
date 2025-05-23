@@ -387,16 +387,20 @@ export const AddCarForm = () => {
       setValue(key as keyof AddCarSchema, value as string);
     });
   }, [images, setValue]);
+  console.log("Component loaded");
 
   const autoGenerateHandler = useCallback(async () => {
     try {
+      console.log("watch", watch("name"));
       if (!watch("name"))
         return toast.error("Please enter a car name to generate images");
       setIsGenerateAILoading(true);
 
       // Generate Info
+      console.log("hello")
+      console.log("autoGenerateCar:", autoGenerateCar);
       const result = await autoGenerateCar(watch("name"));
-
+    console.log("Is it fucking generating", result);
       if (!result) {
         toast.error("Failed to generate car details");
         return;
@@ -426,6 +430,22 @@ export const AddCarForm = () => {
       setIsGenerateAILoading(false);
     }
   }, [watch, setValue]);
+   useEffect(() => {
+    setValue("images", images);
+
+    const savedCarDetails = localStorage.getItem(STORAGE_KEY);
+
+    if (!savedCarDetails) return;
+    const parsedDetails = JSON.parse(savedCarDetails) as AddCarSchema;
+
+    setColors(parsedDetails.colors);
+    setFeatures(parsedDetails.features);
+
+    Object.entries(parsedDetails).forEach(([key, value]) => {
+      setValue(key as keyof AddCarSchema, value as string);
+    });
+  }, [images, setValue]);
+
 
   
   return (

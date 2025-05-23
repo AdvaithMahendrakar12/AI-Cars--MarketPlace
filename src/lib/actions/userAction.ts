@@ -23,3 +23,35 @@ export const getMyProfile = cache(
   [],
   { revalidate: 60 * 60 * 24 }
 );
+
+export const getBookmarkCars = async () => {
+    const session = await auth();
+    const email = session?.user?.email;
+    
+    if (!email) return null;
+    
+    const user = await getMyProfile(email);
+    
+    if (!user) return null;
+   
+         const cars = await prisma.car.findMany({
+    where: {
+      savedBy: {
+        some: {
+          id: user.id,
+        },
+      },
+    },
+    include: {
+      specification: true,
+      savedBy: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+    
+    return cars;
+}

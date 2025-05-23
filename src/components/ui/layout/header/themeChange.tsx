@@ -1,11 +1,10 @@
 "use client";
 
-import React from 'react'
 import { MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
-const  ThemeChange = () => {
-   const { setTheme, theme } = useTheme();
+export const ThemeChange = () => {
+  const { setTheme, theme } = useTheme();
 
   return theme === "dark" ? (
     <button
@@ -21,7 +20,5 @@ const  ThemeChange = () => {
     >
       <MoonIcon />
     </button>
-  )
-}
-
-export default ThemeChange
+  );
+};

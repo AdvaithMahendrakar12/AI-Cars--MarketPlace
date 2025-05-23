@@ -10,7 +10,6 @@ export const imagekitAuthenticator = async () => {
       );
     }
 
-    // Parse and destructure the response JSON for upload credentials.
     const data = await response.json();
     const { signature, expire, token, publicKey } = data;
     return { signature, expire, token, publicKey };

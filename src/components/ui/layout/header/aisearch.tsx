@@ -1,5 +1,5 @@
 "use client";
-import React from 'react'
+import React, { FormEvent } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -11,20 +11,41 @@ import {
 import { SearchIcon, SmileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from 'sonner';
+import { string } from 'zod';
+import { findCar } from '@/lib/actions/aiAction';
+import { useRouter } from "next/navigation";
+
 
 function AiSearch() {
     const [isOpen, setIsOpen] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
     const [description, setDescription] = React.useState("");
-    const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            setDescription("");
-            setIsOpen(false);
-        }, 2000);
-    };
+    
+     const router = useRouter(); 
+     const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
+
+    if (!description) return toast.error("Please enter some description first");
+
+    setIsLoading(true);
+
+    try {
+      const result: "No car found" | "Error generating car search" | string =
+        await findCar(description);
+
+      const carId = string().parse(result);
+      router.replace(`/cars/${carId}`);
+
+      toast.success(`Car found with ID: ${carId}`);
+      setDescription("");
+      setIsOpen(false);
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message);
+      else toast.error("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger className="ml-auto mr-4  flex items-center gap-1  bg-muted rounded-lg px-4 py-2 hover:bg-muted">

@@ -1,5 +1,6 @@
 
 "use server";
+import { console } from "inspector";
 import { aiService } from "../ai";
 import { extractJSON, isNotCarFound } from "../utils";
 
@@ -14,8 +15,16 @@ export const findCar = async (carDescription: string) => {
 };
 
 export const autoGenerateCar = async (carName: string) => {
-  const response = await aiService.generateCarAgent(carName);
-  const parsed = extractJSON(response);
+  try {
+    console.log("Start of autoGenerateCar");
+    console.log("Car name:", carName);
+    const response = await aiService.generateCarAgent(carName);
+    console.log("Response from AI:", response);
+    const parsed = extractJSON(response);
+    return parsed;
+  } catch (error) {
+    console.error("Error in autoGenerateCar:", error);
+    return null;
+  }
+};
 
-  return parsed;
-}; 
