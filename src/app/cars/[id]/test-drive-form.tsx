@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { scheduleTestDrive } from "@/lib/actions/cars-action";
+import { scheduleTestDrive } from "@/lib/actions/carActions";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";

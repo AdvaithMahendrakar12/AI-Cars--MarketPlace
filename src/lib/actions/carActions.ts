@@ -255,3 +255,119 @@ export const getSellerInfo = cache(
   [],
   { revalidate: 60 * 60 * 24 }
 );
+
+
+export const scheduleTestDrive = cache(
+ async ({carId,date}: {carId : string,date: Date;}) => {
+  const session = await auth();
+  const authUser = session?.user;
+
+  if (!authUser) throw new Error("User not authenticated");
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: authUser.email!,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!user) throw new Error("User not found");
+  if (!carId) throw new Error("Car ID is required");
+
+  const car = await prisma.car.findUnique({
+    where: {
+      id: carId,
+    },
+    select: {
+      id: true,
+    }
+  })
+
+  if(!car) throw new Error("Car not found");
+ 
+    await prisma.testDriveRequest.upsert({
+    where: {
+      carId_userId: {
+        carId: carId,
+        userId: user.id,
+      },
+    },
+    create: { carId, userId: user.id, date },
+    update: { date },
+  });
+  revalidatePath(`/cars/${carId}`);
+  return { success: true };
+ },
+[],
+  { revalidate: 60 * 60 * 24 }
+)
+
+export const bookmarkCar = async (carId: string) => {
+  const session = await auth();
+  const authUser = session?.user;
+
+  if (!authUser) throw new Error("User not authenticated");
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: authUser.email!,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!user) throw new Error("User not found");
+
+  if (!carId) throw new Error("Car ID is required");
+
+  const car = await prisma.car.findUnique({
+    where: {
+      id: carId,
+    },
+    select: {
+      id: true,
+      savedBy: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+  if (!car) throw new Error("Car not found");
+
+  const isAlreadySaved = car.savedBy.some((item) => item.id === user.id);
+  console.log("Car saved by", isAlreadySaved);
+
+  if (isAlreadySaved) {
+    await prisma.car.update({
+      where: {
+        id: carId,
+      },
+      data: {
+        savedBy: {
+          disconnect: {
+            id: user.id,
+          },
+        },
+      },
+    });
+  } else {
+    await prisma.car.update({
+      where: {
+        id: carId,
+      },
+      data: {
+        savedBy: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    });
+  }
+
+  revalidatePath(`/cars/${carId}`);
+};
